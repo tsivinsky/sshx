@@ -43,6 +43,9 @@ func main() {
 	case "connect":
 		err = handleConnectCommand(conf, *serverName)
 		break
+
+	case "list", "ls":
+		err = handleListCommand(conf)
 	}
 
 	if err != nil {
@@ -103,6 +106,14 @@ func handleConnectCommand(conf *config.Config, name string) error {
 
 	if err := cmd.Run(); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func handleListCommand(conf *config.Config) error {
+	for _, server := range conf.Servers {
+		fmt.Printf("%s: %s@%s\n", server.Name, server.User, server.Host)
 	}
 
 	return nil

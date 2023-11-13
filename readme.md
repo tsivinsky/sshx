@@ -15,3 +15,9 @@ sshx add
 ```bash
 sshx -name {server_name} connect
 ```
+
+### List added servers
+
+```bash
+sshx list
+```

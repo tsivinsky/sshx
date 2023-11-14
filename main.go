@@ -89,9 +89,26 @@ func handleAddCommand(conf *config.Config) error {
 
 func handleConnectCommand(conf *config.Config, name string) error {
 	var server *config.Server
-	for _, s := range conf.Servers {
-		if s.Name == name {
-			server = &s
+
+	if name == "" {
+		options := []string{}
+		for _, s := range conf.Servers {
+			options = append(options, s.Name)
+		}
+
+		i, err := prompter.Select("Choose server: ", "", options)
+		if err != nil {
+			return err
+		}
+
+		server = &conf.Servers[i]
+	}
+
+	if server == nil {
+		for _, s := range conf.Servers {
+			if s.Name == name {
+				server = &s
+			}
 		}
 	}
 

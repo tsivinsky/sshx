@@ -61,7 +61,7 @@ func handleAddCommand(conf *config.Config) error {
 		return err
 	}
 
-	user, err := prompter.Input("Server user: ", "")
+	user, err := prompter.Input("Server user: ", "root")
 	if err != nil {
 		return err
 	}

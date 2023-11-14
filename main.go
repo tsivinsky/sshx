@@ -8,7 +8,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/tsivinsky/sshx/cli"
+	ghPrompter "github.com/cli/go-gh/v2/pkg/prompter"
 	"github.com/tsivinsky/sshx/config"
 )
 
@@ -18,6 +18,8 @@ import (
 3. I can remove servers
 4. I can connect to server via ssh
 */
+
+var prompter = ghPrompter.New(os.Stdin, os.Stdout, os.Stderr)
 
 var (
 	serverName = flag.String("name", "", "server name")
@@ -54,17 +56,17 @@ func main() {
 }
 
 func handleAddCommand(conf *config.Config) error {
-	name, err := cli.Prompt("Server name: ")
+	name, err := prompter.Input("Server name: ", "")
 	if err != nil {
 		return err
 	}
 
-	user, err := cli.Prompt("Server user: ")
+	user, err := prompter.Input("Server user: ", "")
 	if err != nil {
 		return err
 	}
 
-	host, err := cli.Prompt("Server host: ")
+	host, err := prompter.Input("Server host: ", "")
 	if err != nil {
 		return err
 	}

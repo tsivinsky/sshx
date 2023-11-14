@@ -21,3 +21,9 @@ sshx -name {server_name} connect
 ```bash
 sshx list
 ```
+
+### Remove servers
+
+```bash
+sshx rm
+```

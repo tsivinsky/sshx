@@ -67,18 +67,12 @@ func Write(conf *Config) error {
 		return err
 	}
 
-	f, err := os.OpenFile(path.Join(confDir, configDir, configFile), os.O_RDWR, 0644)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	data, err := json.MarshalIndent(&conf, "", "  ")
+	data, err := json.MarshalIndent(conf, "", "  ")
 	if err != nil {
 		return err
 	}
 
-	_, err = f.Write(data)
+	err = os.WriteFile(path.Join(confDir, configDir, configFile), data, 0644)
 	if err != nil {
 		return err
 	}

@@ -50,6 +50,10 @@ func main() {
 		err = handleListCommand(conf)
 		break
 
+	case "remove", "rm":
+		err = handleRemoveCommand(conf)
+		break
+
 	default:
 		err = handleConnectCommand(conf, *serverName)
 		break
@@ -138,6 +142,41 @@ func handleConnectCommand(conf *config.Config, name string) error {
 func handleListCommand(conf *config.Config) error {
 	for _, server := range conf.Servers {
 		fmt.Printf("%s: %s@%s\n", server.Name, server.User, server.Host)
+	}
+
+	return nil
+}
+
+func handleRemoveCommand(conf *config.Config) error {
+	options := []string{}
+	for _, server := range conf.Servers {
+		options = append(options, server.Name)
+	}
+
+	selectedServers, err := prompter.MultiSelect("Select servers to remove: ", []string{}, options)
+	if err != nil {
+		return err
+	}
+
+	newServers := []config.Server{}
+	for i, server := range conf.Servers {
+		keep := true
+
+		for _, j := range selectedServers {
+			if i == j {
+				keep = false
+			}
+		}
+
+		if keep {
+			newServers = append(newServers, server)
+		}
+	}
+	conf.Servers = newServers
+
+	err = config.Write(conf)
+	if err != nil {
+		return err
 	}
 
 	return nil

@@ -49,6 +49,10 @@ func main() {
 	case "list", "ls":
 		err = handleListCommand(conf)
 		break
+
+	default:
+		err = handleConnectCommand(conf, *serverName)
+		break
 	}
 
 	if err != nil {

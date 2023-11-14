@@ -12,13 +12,6 @@ import (
 	"github.com/tsivinsky/sshx/config"
 )
 
-/*
-1. I can add servers
-2. I can list servers
-3. I can remove servers
-4. I can connect to server via ssh
-*/
-
 var prompter = ghPrompter.New(os.Stdin, os.Stdout, os.Stderr)
 
 var (

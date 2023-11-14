@@ -35,3 +35,9 @@ sshx list
 ```bash
 sshx rm
 ```
+
+### Update server info
+
+```bash
+sshx update
+```

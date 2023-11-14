@@ -47,6 +47,10 @@ func main() {
 		err = handleRemoveCommand(conf)
 		break
 
+	case "update":
+		err = handleUpdateCommand(conf)
+		break
+
 	default:
 		err = handleConnectCommand(conf, *serverName)
 		break
@@ -166,6 +170,40 @@ func handleRemoveCommand(conf *config.Config) error {
 		}
 	}
 	conf.Servers = newServers
+
+	err = config.Write(conf)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func handleUpdateCommand(conf *config.Config) error {
+	options := []string{}
+	for _, server := range conf.Servers {
+		options = append(options, server.Name)
+	}
+
+	i, err := prompter.Select("Select server to update: ", "", options)
+	if err != nil {
+		return err
+	}
+
+	conf.Servers[i].Name, err = prompter.Input("Server name: ", conf.Servers[i].Name)
+	if err != nil {
+		return err
+	}
+
+	conf.Servers[i].User, err = prompter.Input("Server user: ", conf.Servers[i].User)
+	if err != nil {
+		return err
+	}
+
+	conf.Servers[i].Host, err = prompter.Input("Server host: ", conf.Servers[i].Host)
+	if err != nil {
+		return err
+	}
 
 	err = config.Write(conf)
 	if err != nil {

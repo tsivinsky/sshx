@@ -16,6 +16,14 @@ sshx add
 sshx -name {server_name} connect
 ```
 
+or just
+
+```bash
+sshx
+```
+
+and select server from the list
+
 ### List added servers
 
 ```bash

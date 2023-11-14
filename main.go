@@ -48,6 +48,7 @@ func main() {
 
 	case "list", "ls":
 		err = handleListCommand(conf)
+		break
 	}
 
 	if err != nil {

@@ -22,30 +22,28 @@ type Config struct {
 	Servers []Server `json:"servers"`
 }
 
-func Load() (*Config, error) {
+func (c *Config) Load() error {
 	confDir, err := os.UserConfigDir()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if _, err := os.Stat(path.Join(confDir, configDir)); os.IsNotExist(err) {
 		err = os.Mkdir(path.Join(confDir, configDir), 0777)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
 	f, err := os.OpenFile(path.Join(confDir, configDir, configFile), os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer f.Close()
 
-	conf := new(Config)
-
 	data, err := io.ReadAll(f)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if string(data) == "" {
@@ -53,12 +51,11 @@ func Load() (*Config, error) {
 		data = []byte("{}")
 	}
 
-	err = json.Unmarshal(data, &conf)
+	err = json.Unmarshal(data, c)
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	return conf, nil
+	return nil
 }
 
 func Write(conf *Config) error {

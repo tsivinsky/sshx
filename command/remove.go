@@ -32,7 +32,7 @@ func Remove(conf *config.Config) error {
 	}
 	conf.Servers = newServers
 
-	err = config.Write(conf)
+	err = conf.Write()
 	if err != nil {
 		return err
 	}

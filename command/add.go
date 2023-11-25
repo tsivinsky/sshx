@@ -29,7 +29,7 @@ func Add(conf *config.Config) error {
 
 	conf.Servers = append(conf.Servers, server)
 
-	err = config.Write(conf)
+	err = conf.Write()
 	if err != nil {
 		return err
 	}

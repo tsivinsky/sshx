@@ -58,7 +58,7 @@ func (c *Config) Load() error {
 	return nil
 }
 
-func Write(conf *Config) error {
+func (conf *Config) Write() error {
 	confDir, err := os.UserConfigDir()
 	if err != nil {
 		return err

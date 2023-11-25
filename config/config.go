@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"os"
 )
 
 type Server struct {
@@ -14,11 +15,9 @@ type Server struct {
 }
 
 type Config struct {
-	Servers    []Server `json:"servers"`
-	configDir  string
-	configFile string
-	output     io.Writer
-	input      io.Reader
+	Servers []Server `json:"servers"`
+	output  io.Writer
+	input   io.Reader
 }
 
 // used to override default behavior
@@ -27,8 +26,8 @@ type option func(*Config) error
 // used to initialize a new Config
 func NewConfig(opts ...option) (*Config, error) {
 	conf := &Config{
-		configDir:  "sshx",
-		configFile: "config.json"}
+		input:  os.Stdin,
+		output: os.Stdout}
 	// loops through options to override defaults
 	for _, opt := range opts {
 		err := opt(conf)

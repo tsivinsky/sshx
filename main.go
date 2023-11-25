@@ -12,6 +12,8 @@ import (
 
 var (
 	serverName = flag.String("name", "", "server name")
+	configDir  = "sshx"
+	configFile = "config.json"
 )
 
 func main() {
@@ -24,13 +26,19 @@ func main() {
 		fmt.Fprintln(os.Stderr, err)
 	}
 
-	// sets filepath default when running as CLI
-	filepath := path.Join(confDir, "sshx", "config.json")
+	// sets config.json filepath default when running as CLI
+	filepath := path.Join(confDir, configDir, configFile)
 
 	// opens $HOME/.config/sshx/config.json for reading
 	inFile, err := os.Open(filepath)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		// file doesn't exist, must be created
+		inFile, err := os.Create(filepath)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		defer inFile.Close()
 	}
 	defer inFile.Close()
 
@@ -47,6 +55,7 @@ func main() {
 		config.WithFileOutput(outFile),
 	)
 	if err != nil {
+		fmt.Println("entre 1")
 		fmt.Fprintln(os.Stderr, err)
 	}
 

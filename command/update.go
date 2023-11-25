@@ -31,7 +31,7 @@ func Update(conf *config.Config) error {
 		return err
 	}
 
-	err = config.Write(conf)
+	err = conf.Write()
 	if err != nil {
 		return err
 	}

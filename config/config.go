@@ -2,9 +2,9 @@ package config
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
-	"os"
-	"path"
 )
 
 type Server struct {
@@ -13,69 +13,75 @@ type Server struct {
 	Host string `json:"server"`
 }
 
-var (
-	configDir  = "sshx"
-	configFile = "config.json"
-)
-
 type Config struct {
-	Servers []Server `json:"servers"`
+	Servers    []Server `json:"servers"`
+	configDir  string
+	configFile string
+	output     io.Writer
+	input      io.Reader
 }
 
-func Load() (*Config, error) {
-	confDir, err := os.UserConfigDir()
-	if err != nil {
-		return nil, err
-	}
+// used to override default behavior
+type option func(*Config) error
 
-	if _, err := os.Stat(path.Join(confDir, configDir)); os.IsNotExist(err) {
-		err = os.Mkdir(path.Join(confDir, configDir), 0777)
+// used to initialize a new Config
+func NewConfig(opts ...option) (*Config, error) {
+	conf := &Config{
+		configDir:  "sshx",
+		configFile: "config.json"}
+	// loops through options to override defaults
+	for _, opt := range opts {
+		err := opt(conf)
 		if err != nil {
 			return nil, err
 		}
 	}
-
-	f, err := os.OpenFile(path.Join(confDir, configDir, configFile), os.O_RDWR|os.O_CREATE, 0644)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	conf := new(Config)
-
-	data, err := io.ReadAll(f)
-	if err != nil {
-		return nil, err
-	}
-
-	if string(data) == "" {
-		f.Write([]byte("{}"))
-		data = []byte("{}")
-	}
-
-	err = json.Unmarshal(data, &conf)
-	if err != nil {
-		return nil, err
-	}
-
 	return conf, nil
 }
 
-func Write(conf *Config) error {
-	confDir, err := os.UserConfigDir()
+// option to override input reading mode when used via CLI
+func WithFileInput(input io.Reader) option {
+	return func(c *Config) error {
+		if input == nil {
+			return errors.New("nil input reader")
+		}
+		c.input = input
+		return nil
+	}
+}
+
+// option to override output writing mode when used via CLI
+func WithFileOutput(output io.Writer) option {
+	return func(c *Config) error {
+		if output == nil {
+			return errors.New("nil output writer")
+		}
+		c.output = output
+		return nil
+	}
+}
+
+// load the configs from file or sdtIn
+func (conf *Config) Load() error {
+	data, err := io.ReadAll(conf.input)
 	if err != nil {
 		return err
 	}
 
+	err = json.Unmarshal(data, conf)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// writes the configs to file or stdOut
+func (conf *Config) Write() error {
 	data, err := json.MarshalIndent(conf, "", "  ")
 	if err != nil {
 		return err
 	}
-
-	err = os.WriteFile(path.Join(confDir, configDir, configFile), data, 0644)
-	if err != nil {
-		return err
-	}
-
+	// write to file
+	fmt.Fprintln(conf.output, string(data))
 	return nil
 }

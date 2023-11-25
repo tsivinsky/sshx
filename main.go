@@ -16,7 +16,10 @@ func main() {
 	flag.Parse()
 
 	var err error
-	conf := &config.Config{}
+	conf, err := config.NewConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
 	err = conf.Load()
 	if err != nil {
 		log.Fatal(err)

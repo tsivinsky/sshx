@@ -13,29 +13,43 @@ type Server struct {
 	Host string `json:"server"`
 }
 
-var (
-	configDir  = "sshx"
-	configFile = "config.json"
-)
-
 type Config struct {
-	Servers []Server `json:"servers"`
+	Servers    []Server `json:"servers"`
+	configDir  string
+	configFile string
 }
 
-func (c *Config) Load() error {
+// used to override default behavior
+type option func(*Config) error
+
+// used to initialize a new Config
+func NewConfig(opts ...option) (*Config, error) {
+	conf := &Config{
+		configDir:  "sshx",
+		configFile: "config.json"}
+	for _, opt := range opts {
+		err := opt(conf)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return conf, nil
+}
+
+func (conf *Config) Load() error {
 	confDir, err := os.UserConfigDir()
 	if err != nil {
 		return err
 	}
 
-	if _, err := os.Stat(path.Join(confDir, configDir)); os.IsNotExist(err) {
-		err = os.Mkdir(path.Join(confDir, configDir), 0777)
+	if _, err := os.Stat(path.Join(confDir, conf.configDir)); os.IsNotExist(err) {
+		err = os.Mkdir(path.Join(confDir, conf.configDir), 0777)
 		if err != nil {
 			return err
 		}
 	}
 
-	f, err := os.OpenFile(path.Join(confDir, configDir, configFile), os.O_RDWR|os.O_CREATE, 0644)
+	f, err := os.OpenFile(path.Join(confDir, conf.configDir, conf.configFile), os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}
@@ -51,7 +65,7 @@ func (c *Config) Load() error {
 		data = []byte("{}")
 	}
 
-	err = json.Unmarshal(data, c)
+	err = json.Unmarshal(data, conf)
 	if err != nil {
 		return err
 	}
@@ -69,7 +83,7 @@ func (conf *Config) Write() error {
 		return err
 	}
 
-	err = os.WriteFile(path.Join(confDir, configDir, configFile), data, 0644)
+	err = os.WriteFile(path.Join(confDir, conf.configDir, conf.configFile), data, 0644)
 	if err != nil {
 		return err
 	}

@@ -29,6 +29,7 @@ func NewConfig(opts ...option) (*Config, error) {
 	conf := &Config{
 		configDir:  "sshx",
 		configFile: "config.json"}
+	// loops through options to override defaults
 	for _, opt := range opts {
 		err := opt(conf)
 		if err != nil {
@@ -38,6 +39,7 @@ func NewConfig(opts ...option) (*Config, error) {
 	return conf, nil
 }
 
+// option to override input reading mode when used via CLI
 func WithFileInput(input io.Reader) option {
 	return func(c *Config) error {
 		if input == nil {
@@ -48,6 +50,7 @@ func WithFileInput(input io.Reader) option {
 	}
 }
 
+// option to override output writing mode when used via CLI
 func WithFileOutput(output io.Writer) option {
 	return func(c *Config) error {
 		if output == nil {
@@ -58,34 +61,12 @@ func WithFileOutput(output io.Writer) option {
 	}
 }
 
+// load the configs from file or sdtIn
 func (conf *Config) Load() error {
-	// confDir, err := os.UserConfigDir()
-	// if err != nil {
-	// 	return err
-	// }
-
-	// if _, err := os.Stat(path.Join(confDir, conf.configDir)); os.IsNotExist(err) {
-	// 	err = os.Mkdir(path.Join(confDir, conf.configDir), 0777)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
-
-	// f, err := os.OpenFile(path.Join(confDir, conf.configDir, conf.configFile), os.O_RDWR|os.O_CREATE, 0644)
-	// if err != nil {
-	// 	return err
-	// }
-	// defer f.Close()
-
 	data, err := io.ReadAll(conf.input)
 	if err != nil {
 		return err
 	}
-
-	// if string(data) == "" {
-	// 	f.Write([]byte("{}"))
-	// 	data = []byte("{}")
-	// }
 
 	err = json.Unmarshal(data, conf)
 	if err != nil {
@@ -94,6 +75,7 @@ func (conf *Config) Load() error {
 	return nil
 }
 
+// writes the configs to file or stdOut
 func (conf *Config) Write() error {
 	data, err := json.MarshalIndent(conf, "", "  ")
 	if err != nil {

@@ -34,7 +34,10 @@ func main() {
 	}
 	defer outFile.Close()
 
-	conf, err := config.NewConfig()
+	conf, err := config.NewConfig(
+		config.WithFileInput(inFile),
+		config.WithFileOutput(outFile),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}

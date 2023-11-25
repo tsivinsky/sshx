@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"os"
-	"path"
 )
 
 type Server struct {
@@ -61,33 +59,33 @@ func WithFileOutput(output io.Writer) option {
 }
 
 func (conf *Config) Load() error {
-	confDir, err := os.UserConfigDir()
+	// confDir, err := os.UserConfigDir()
+	// if err != nil {
+	// 	return err
+	// }
+
+	// if _, err := os.Stat(path.Join(confDir, conf.configDir)); os.IsNotExist(err) {
+	// 	err = os.Mkdir(path.Join(confDir, conf.configDir), 0777)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
+
+	// f, err := os.OpenFile(path.Join(confDir, conf.configDir, conf.configFile), os.O_RDWR|os.O_CREATE, 0644)
+	// if err != nil {
+	// 	return err
+	// }
+	// defer f.Close()
+
+	data, err := io.ReadAll(conf.input)
 	if err != nil {
 		return err
 	}
 
-	if _, err := os.Stat(path.Join(confDir, conf.configDir)); os.IsNotExist(err) {
-		err = os.Mkdir(path.Join(confDir, conf.configDir), 0777)
-		if err != nil {
-			return err
-		}
-	}
-
-	f, err := os.OpenFile(path.Join(confDir, conf.configDir, conf.configFile), os.O_RDWR|os.O_CREATE, 0644)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	data, err := io.ReadAll(f)
-	if err != nil {
-		return err
-	}
-
-	if string(data) == "" {
-		f.Write([]byte("{}"))
-		data = []byte("{}")
-	}
+	// if string(data) == "" {
+	// 	f.Write([]byte("{}"))
+	// 	data = []byte("{}")
+	// }
 
 	err = json.Unmarshal(data, conf)
 	if err != nil {

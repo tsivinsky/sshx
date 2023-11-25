@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path"
@@ -44,6 +45,7 @@ func WithFileInput(input io.Reader) option {
 		if input == nil {
 			return errors.New("nil input reader")
 		}
+		c.input = input
 		return nil
 	}
 }
@@ -53,6 +55,7 @@ func WithFileOutput(output io.Writer) option {
 		if output == nil {
 			return errors.New("nil output writer")
 		}
+		c.output = output
 		return nil
 	}
 }
@@ -94,20 +97,11 @@ func (conf *Config) Load() error {
 }
 
 func (conf *Config) Write() error {
-	confDir, err := os.UserConfigDir()
-	if err != nil {
-		return err
-	}
-
 	data, err := json.MarshalIndent(conf, "", "  ")
 	if err != nil {
 		return err
 	}
-
-	err = os.WriteFile(path.Join(confDir, conf.configDir, conf.configFile), data, 0644)
-	if err != nil {
-		return err
-	}
-
+	// write to file
+	fmt.Fprintln(conf.output, string(data))
 	return nil
 }

@@ -26,13 +26,11 @@ func main() {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 	}
-	defer inFile.Close()
 
 	outFile, err := os.OpenFile(filepath, os.O_RDWR, 0644)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 	}
-	defer outFile.Close()
 
 	conf, err := config.NewConfig(
 		config.WithFileInput(inFile),
@@ -64,4 +62,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer inFile.Close()
+	defer outFile.Close()
 }

@@ -2,7 +2,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"os"
+	"path"
 
 	"github.com/tsivinsky/sshx/command"
 	"github.com/tsivinsky/sshx/config"
@@ -14,8 +17,23 @@ var (
 
 func main() {
 	flag.Parse()
+	confDir, err := os.UserConfigDir()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+	filepath := path.Join(confDir, "sshx", "config.json")
+	inFile, err := os.Open(filepath)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+	defer inFile.Close()
 
-	var err error
+	outFile, err := os.OpenFile(filepath, os.O_RDWR, 0644)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+	defer outFile.Close()
+
 	conf, err := config.NewConfig()
 	if err != nil {
 		log.Fatal(err)

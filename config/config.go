@@ -107,6 +107,6 @@ func (conf *Config) Write() error {
 	}
 
 	// write to file
-	fmt.Fprint(file, string(data))
+	fmt.Fprintln(file, string(data))
 	return nil
 }

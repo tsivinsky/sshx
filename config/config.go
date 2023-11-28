@@ -78,7 +78,10 @@ func (conf *Config) Load() error {
 	if err != nil {
 		return err
 	}
-
+	if len(data) == 0 {
+		conf.Servers = []Server{}
+		return nil
+	}
 	err = json.Unmarshal(data, conf)
 	if err != nil {
 		return err

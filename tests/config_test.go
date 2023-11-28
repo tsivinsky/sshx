@@ -42,6 +42,7 @@ var content = []byte(`{
   `)
 
 func TestLoad(t *testing.T) {
+	t.Parallel()
 	testFile, err := os.CreateTemp("", "*_test_config.json")
 
 	if err != nil {
@@ -70,6 +71,7 @@ func TestLoad(t *testing.T) {
 }
 
 func TestWrite(t *testing.T) {
+	t.Parallel()
 	testFile, err := os.CreateTemp("", "*_test_config.json")
 
 	if err != nil {

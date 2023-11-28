@@ -5,6 +5,15 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Debug remove",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "main.go",
+            "args": ["remove"],
+            "console": "integratedTerminal"
+        },
+        {
             "name": "Debug Add",
             "type": "go",
             "request": "launch",

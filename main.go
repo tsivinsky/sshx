@@ -67,7 +67,7 @@ func main() {
 
 	switch flag.Arg(0) {
 	case "add":
-		err = command.Add(conf)
+		err = conf.Add()
 	case "connect":
 		err = command.Connect(conf, *serverName)
 	case "list", "ls":

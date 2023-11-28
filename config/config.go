@@ -118,3 +118,11 @@ func (conf *Config) Add() error {
 
 	return nil
 }
+
+func (conf *Config) List() error {
+	for _, server := range conf.Servers {
+		fmt.Printf("%s: %s@%s\n", server.Name, server.User, server.Host)
+	}
+
+	return nil
+}

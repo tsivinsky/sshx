@@ -71,11 +71,11 @@ func main() {
 	case "connect":
 		err = command.Connect(conf, *serverName)
 	case "list", "ls":
-		err = command.List(conf)
+		err = conf.List()
 	case "remove", "rm":
-		err = command.Remove(conf)
+		err = conf.Remove()
 	case "update":
-		err = command.Update(conf)
+		err = conf.Update()
 	default:
 		err = command.Connect(conf, *serverName)
 	}

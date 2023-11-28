@@ -6,7 +6,19 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 )
+
+var (
+	configDir  = "sshx"
+	configFile = "config.json"
+)
+
+type Prompter interface {
+	Select(prompt string, defaultValue string, options []string) (int, error)
+	Input(prompt string, defaultValue string) (string, error)
+	MultiSelect(prompt string, defaultValues []string, options []string) ([]int, error)
+}
 
 type Server struct {
 	Name string `json:"name"`
@@ -16,8 +28,7 @@ type Server struct {
 
 type Config struct {
 	Servers []Server `json:"servers"`
-	output  io.Writer
-	input   io.Reader
+	File    string
 }
 
 // used to override default behavior
@@ -25,9 +36,16 @@ type option func(*Config) error
 
 // used to initialize a new Config
 func NewConfig(opts ...option) (*Config, error) {
+	// sets user config dir
+	confDir, err := os.UserConfigDir()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+
+	// sets config.json filepath default when running as CLI
+	filepath := path.Join(confDir, configDir, configFile)
 	conf := &Config{
-		input:  os.Stdin,
-		output: os.Stdout}
+		File: filepath}
 	// loops through options to override defaults
 	for _, opt := range opts {
 		err := opt(conf)
@@ -39,34 +57,31 @@ func NewConfig(opts ...option) (*Config, error) {
 }
 
 // option to override input reading mode when used via CLI
-func WithFileInput(input io.Reader) option {
+func WithFile(file string) option {
 	return func(c *Config) error {
-		if input == nil {
-			return errors.New("nil input reader")
+		if file == "" {
+			return errors.New("nil file path")
 		}
-		c.input = input
-		return nil
-	}
-}
-
-// option to override output writing mode when used via CLI
-func WithFileOutput(output io.Writer) option {
-	return func(c *Config) error {
-		if output == nil {
-			return errors.New("nil output writer")
-		}
-		c.output = output
+		c.File = file
 		return nil
 	}
 }
 
 // load the configs from file or sdtIn
 func (conf *Config) Load() error {
-	data, err := io.ReadAll(conf.input)
+	file, err := os.OpenFile(conf.File, os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}
-
+	defer file.Close()
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return err
+	}
+	if len(data) == 0 {
+		conf.Servers = []Server{}
+		return nil
+	}
 	err = json.Unmarshal(data, conf)
 	if err != nil {
 		return err
@@ -76,11 +91,20 @@ func (conf *Config) Load() error {
 
 // writes the configs to file or stdOut
 func (conf *Config) Write() error {
+	file, err := os.OpenFile(conf.File, os.O_RDWR, 0644)
+	if err != nil {
+		return err
+	}
+	// solves file appending, there might be a better way to go around this
+	// sshx add -> sshx remove to reproduce
+	os.Truncate(conf.File, 0)
+	defer file.Close()
 	data, err := json.MarshalIndent(conf, "", "  ")
 	if err != nil {
 		return err
 	}
+
 	// write to file
-	fmt.Fprintln(conf.output, string(data))
+	fmt.Fprint(file, string(data))
 	return nil
 }

@@ -99,7 +99,7 @@ func (conf *Config) Write() error {
 	// sshx add -> sshx remove to reproduce
 	os.Truncate(conf.File, 0)
 	defer file.Close()
-	data, err := json.MarshalIndent(conf, "", "  ")
+	data, err := json.MarshalIndent(conf.Servers, "", "  ")
 	if err != nil {
 		return err
 	}

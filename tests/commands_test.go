@@ -44,8 +44,6 @@ func TestAdd(t *testing.T) {
 
 	pm := &promptMock{questionTracker: 0, qa: questionAnswer{1: "s2", 2: "u2", 3: "h2"}}
 
-	testConf.Add(pm)
-
 	want := []config.Server{
 		{Name: "s1", User: "u1", Host: "h1"},
 		{Name: "s2", User: "u2", Host: "h2"}}

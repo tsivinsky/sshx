@@ -20,7 +20,6 @@ func main() {
 	// creates pointer config.Config using the constructure and overriding defaults with CLI values
 	conf, err := config.NewConfig()
 	if err != nil {
-		fmt.Println("entre 1")
 		fmt.Fprintln(os.Stderr, err)
 	}
 	//

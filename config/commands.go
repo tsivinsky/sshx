@@ -5,22 +5,20 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-
-	"github.com/tsivinsky/sshx/cli"
 )
 
-func (conf *Config) Add() error {
-	name, err := cli.Prompter.Input("Server name: ", "")
+func (conf *Config) Add(p Prompter) error {
+	name, err := p.Input("Server name: ", "")
 	if err != nil {
 		return err
 	}
 
-	user, err := cli.Prompter.Input("Server user: ", "root")
+	user, err := p.Input("Server user: ", "root")
 	if err != nil {
 		return err
 	}
 
-	host, err := cli.Prompter.Input("Server host: ", "")
+	host, err := p.Input("Server host: ", "")
 	if err != nil {
 		return err
 	}
@@ -41,7 +39,7 @@ func (conf *Config) Add() error {
 	return nil
 }
 
-func (conf *Config) List() error {
+func (conf *Config) List(p Prompter) error {
 	for _, server := range conf.Servers {
 		fmt.Printf("%s: %s@%s\n", server.Name, server.User, server.Host)
 	}
@@ -49,13 +47,13 @@ func (conf *Config) List() error {
 	return nil
 }
 
-func (conf *Config) Remove() error {
+func (conf *Config) Remove(p Prompter) error {
 	options := []string{}
 	for _, server := range conf.Servers {
 		options = append(options, server.Name)
 	}
 
-	selectedServers, err := cli.Prompter.MultiSelect("Select servers to remove: ", []string{}, options)
+	selectedServers, err := p.MultiSelect("Select servers to remove: ", []string{}, options)
 	if err != nil {
 		return err
 	}
@@ -84,28 +82,28 @@ func (conf *Config) Remove() error {
 	return nil
 }
 
-func (conf *Config) Update() error {
+func (conf *Config) Update(p Prompter) error {
 	options := []string{}
 	for _, server := range conf.Servers {
 		options = append(options, server.Name)
 	}
 
-	i, err := cli.Prompter.Select("Select server to update: ", "", options)
+	i, err := p.Select("Select server to update: ", "", options)
 	if err != nil {
 		return err
 	}
 
-	conf.Servers[i].Name, err = cli.Prompter.Input("Server name: ", conf.Servers[i].Name)
+	conf.Servers[i].Name, err = p.Input("Server name: ", conf.Servers[i].Name)
 	if err != nil {
 		return err
 	}
 
-	conf.Servers[i].User, err = cli.Prompter.Input("Server user: ", conf.Servers[i].User)
+	conf.Servers[i].User, err = p.Input("Server user: ", conf.Servers[i].User)
 	if err != nil {
 		return err
 	}
 
-	conf.Servers[i].Host, err = cli.Prompter.Input("Server host: ", conf.Servers[i].Host)
+	conf.Servers[i].Host, err = p.Input("Server host: ", conf.Servers[i].Host)
 	if err != nil {
 		return err
 	}
@@ -118,7 +116,7 @@ func (conf *Config) Update() error {
 	return nil
 }
 
-func (conf *Config) Connect(name string) error {
+func (conf *Config) Connect(p Prompter, name string) error {
 	var server *Server
 
 	if name == "" {
@@ -127,7 +125,7 @@ func (conf *Config) Connect(name string) error {
 			options = append(options, s.Name)
 		}
 
-		i, err := cli.Prompter.Select("Choose server: ", "", options)
+		i, err := p.Select("Choose server: ", "", options)
 		if err != nil {
 			return err
 		}

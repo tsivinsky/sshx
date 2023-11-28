@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 
+	ghPrompter "github.com/cli/go-gh/v2/pkg/prompter"
 	"github.com/tsivinsky/sshx/config"
 )
 
@@ -57,7 +58,8 @@ func main() {
 		fmt.Println("entre 1")
 		fmt.Fprintln(os.Stderr, err)
 	}
-
+	//
+	prompter := ghPrompter.New(os.Stdin, os.Stdout, os.Stderr)
 	// loads configuration
 	err = conf.Load()
 	if err != nil {
@@ -66,17 +68,17 @@ func main() {
 
 	switch flag.Arg(0) {
 	case "add":
-		err = conf.Add()
+		err = conf.Add(prompter)
 	case "connect":
-		err = conf.Connect(*serverName)
+		err = conf.Connect(prompter, *serverName)
 	case "list", "ls":
-		err = conf.List()
+		err = conf.List(prompter)
 	case "remove", "rm":
-		err = conf.Remove()
+		err = conf.Remove(prompter)
 	case "update":
-		err = conf.Update()
+		err = conf.Update(prompter)
 	default:
-		err = conf.Connect(*serverName)
+		err = conf.Connect(prompter, *serverName)
 	}
 
 	if err != nil {

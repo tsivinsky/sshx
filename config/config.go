@@ -8,6 +8,12 @@ import (
 	"os"
 )
 
+type Prompter interface {
+	Select(prompt string, defaultValue string, options []string) (int, error)
+	Input(prompt string, defaultValue string) (string, error)
+	MultiSelect(prompt string, defaultValues []string, options []string) ([]int, error)
+}
+
 type Server struct {
 	Name string `json:"name"`
 	User string `json:"user"`

@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os"
-
-	"github.com/tsivinsky/sshx/cli"
 )
 
 type Server struct {
@@ -84,45 +82,5 @@ func (conf *Config) Write() error {
 	}
 	// write to file
 	fmt.Fprintln(conf.output, string(data))
-	return nil
-}
-
-func (conf *Config) Add() error {
-	name, err := cli.Prompter.Input("Server name: ", "")
-	if err != nil {
-		return err
-	}
-
-	user, err := cli.Prompter.Input("Server user: ", "root")
-	if err != nil {
-		return err
-	}
-
-	host, err := cli.Prompter.Input("Server host: ", "")
-	if err != nil {
-		return err
-	}
-
-	server := Server{
-		Name: name,
-		User: user,
-		Host: host,
-	}
-
-	conf.Servers = append(conf.Servers, server)
-
-	err = conf.Write()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (conf *Config) List() error {
-	for _, server := range conf.Servers {
-		fmt.Printf("%s: %s@%s\n", server.Name, server.User, server.Host)
-	}
-
 	return nil
 }

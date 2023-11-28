@@ -6,7 +6,6 @@ import (
 	"os"
 	"path"
 
-	"github.com/tsivinsky/sshx/command"
 	"github.com/tsivinsky/sshx/config"
 )
 
@@ -69,7 +68,7 @@ func main() {
 	case "add":
 		err = conf.Add()
 	case "connect":
-		err = command.Connect(conf, *serverName)
+		err = conf.Connect(*serverName)
 	case "list", "ls":
 		err = conf.List()
 	case "remove", "rm":
@@ -77,7 +76,7 @@ func main() {
 	case "update":
 		err = conf.Update()
 	default:
-		err = command.Connect(conf, *serverName)
+		err = conf.Connect(*serverName)
 	}
 
 	if err != nil {

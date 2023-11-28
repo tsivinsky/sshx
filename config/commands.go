@@ -1,6 +1,53 @@
 package config
 
-import "github.com/tsivinsky/sshx/cli"
+import (
+	"errors"
+	"fmt"
+	"os"
+	"os/exec"
+
+	"github.com/tsivinsky/sshx/cli"
+)
+
+func (conf *Config) Add() error {
+	name, err := cli.Prompter.Input("Server name: ", "")
+	if err != nil {
+		return err
+	}
+
+	user, err := cli.Prompter.Input("Server user: ", "root")
+	if err != nil {
+		return err
+	}
+
+	host, err := cli.Prompter.Input("Server host: ", "")
+	if err != nil {
+		return err
+	}
+
+	server := Server{
+		Name: name,
+		User: user,
+		Host: host,
+	}
+
+	conf.Servers = append(conf.Servers, server)
+
+	err = conf.Write()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (conf *Config) List() error {
+	for _, server := range conf.Servers {
+		fmt.Printf("%s: %s@%s\n", server.Name, server.User, server.Host)
+	}
+
+	return nil
+}
 
 func (conf *Config) Remove() error {
 	options := []string{}
@@ -65,6 +112,49 @@ func (conf *Config) Update() error {
 
 	err = conf.Write()
 	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (conf *Config) Connect(name string) error {
+	var server *Server
+
+	if name == "" {
+		options := []string{}
+		for _, s := range conf.Servers {
+			options = append(options, s.Name)
+		}
+
+		i, err := cli.Prompter.Select("Choose server: ", "", options)
+		if err != nil {
+			return err
+		}
+
+		server = &conf.Servers[i]
+	}
+
+	if server == nil {
+		for _, s := range conf.Servers {
+			if s.Name == name {
+				server = &s
+			}
+		}
+	}
+
+	if server == nil {
+		return errors.New("no server with this name")
+	}
+
+	serverHost := fmt.Sprintf("%s@%s", server.User, server.Host)
+
+	cmd := exec.Command("ssh", serverHost)
+	cmd.Stdin = os.Stdin
+	cmd.Stderr = os.Stderr
+	cmd.Stdout = os.Stdout
+
+	if err := cmd.Run(); err != nil {
 		return err
 	}
 

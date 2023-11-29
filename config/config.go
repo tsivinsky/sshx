@@ -28,7 +28,7 @@ type Server struct {
 
 type Config struct {
 	Servers []Server `json:"servers"`
-	File    string
+	File    string   `json:"-"` // field is ignored when marshalling in Write()
 }
 
 // used to override default behavior
@@ -99,12 +99,14 @@ func (conf *Config) Write() error {
 	// sshx add -> sshx remove to reproduce
 	os.Truncate(conf.File, 0)
 	defer file.Close()
+
+	// only save conf.Servers in file omitting the file field
 	data, err := json.MarshalIndent(conf, "", "  ")
 	if err != nil {
 		return err
 	}
 
 	// write to file
-	fmt.Fprint(file, string(data))
+	fmt.Fprintln(file, string(data))
 	return nil
 }

@@ -20,7 +20,6 @@ func main() {
 	// creates pointer config.Config using the constructure and overriding defaults with CLI values
 	conf, err := config.NewConfig()
 	if err != nil {
-		fmt.Println("entre 1")
 		fmt.Fprintln(os.Stderr, err)
 	}
 	//
@@ -37,7 +36,7 @@ func main() {
 	case "connect":
 		err = conf.Connect(prompter, *serverName)
 	case "list", "ls":
-		err = conf.List(prompter)
+		err = conf.List(os.Stdout)
 	case "remove", "rm":
 		err = conf.Remove(prompter)
 	case "update":

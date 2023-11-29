@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 )
@@ -39,9 +40,9 @@ func (conf *Config) Add(p Prompter) error {
 	return nil
 }
 
-func (conf *Config) List(p Prompter) error {
+func (conf *Config) List(output io.Writer) error {
 	for _, server := range conf.Servers {
-		fmt.Printf("%s: %s@%s\n", server.Name, server.User, server.Host)
+		fmt.Fprintf(output, "%s: %s@%s\n", server.Name, server.User, server.Host)
 	}
 
 	return nil

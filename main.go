@@ -36,7 +36,7 @@ func main() {
 	case "connect":
 		err = conf.Connect(prompter, *serverName)
 	case "list", "ls":
-		err = conf.List(prompter)
+		err = conf.List(os.Stdout)
 	case "remove", "rm":
 		err = conf.Remove(prompter)
 	case "update":

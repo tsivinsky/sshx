@@ -1,6 +1,7 @@
 package sshx_test
 
 import (
+	"bytes"
 	"reflect"
 	"testing"
 
@@ -119,5 +120,31 @@ func TestUpdate(t *testing.T) {
 		{Name: "s4", User: "u4", Host: "h4"}}
 	if got := testConf.Servers; !reflect.DeepEqual(got, want) {
 		t.Fatalf("got %v, want %v", got, want)
+	}
+}
+
+func TestList(t *testing.T) {
+	t.Parallel()
+	// test set up and tearDown
+	testFile, testConf, err := setUp()
+	defer tearDown(testFile)
+	if err != nil {
+		t.Errorf("error setting up test scenario: %v", err)
+	}
+	// populate test data
+	testConf.Servers = []config.Server{
+		{Name: "s1", User: "u1", Host: "h1"},
+		{Name: "s2", User: "u2", Host: "h2"},
+		{Name: "s3", User: "u3", Host: "h3"},
+		{Name: "s4", User: "u4", Host: "h4"}}
+	got := new(bytes.Buffer)
+	testConf.List(got)
+
+	want := "s1: u1@h1\ns2: u2@h2\ns3: u3@h3\ns4: u4@h4\n"
+	if err != nil {
+		t.Errorf("TestList: error marshalling testConf.Servers")
+	}
+	if got.String() != want {
+		t.Fatalf("got: %v, want: %v", got, want)
 	}
 }

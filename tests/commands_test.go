@@ -7,16 +7,20 @@ import (
 	"github.com/tsivinsky/sshx/config"
 )
 
+// dict to simulate prompt input reply
+// index is #question
+// the index is tracked on questionTracker
 type questionAnswer map[int]string
 
 type promptMock struct {
-	qa                questionAnswer
-	questionTracker   int
-	MultiSelectAnswer []int
+	qa                 questionAnswer
+	questionTracker    int
+	multiSelectAnswer  []int
+	simpleSelectAnswer int
 }
 
 func (p *promptMock) Select(prompt string, defaultValue string, options []string) (int, error) {
-	return 0, nil
+	return p.simpleSelectAnswer, nil
 }
 
 func (p *promptMock) Input(prompt string, defaultValue string) (string, error) {
@@ -25,7 +29,7 @@ func (p *promptMock) Input(prompt string, defaultValue string) (string, error) {
 }
 
 func (p *promptMock) MultiSelect(prompt string, defaultValues []string, options []string) ([]int, error) {
-	return p.MultiSelectAnswer, nil
+	return p.multiSelectAnswer, nil
 }
 
 func TestAdd(t *testing.T) {
@@ -72,7 +76,7 @@ func TestRemove(t *testing.T) {
 		{Name: "s4", User: "u4", Host: "h4"}}
 	// populate mockPrompt with expected answers
 	// remove s2 and s4
-	mp := &promptMock{MultiSelectAnswer: []int{1, 3}}
+	mp := &promptMock{multiSelectAnswer: []int{1, 3}}
 	err = testConf.Remove(mp)
 	if err != nil {
 		t.Errorf("TestRemove: error running TestConf.Remove(mp).\nerror: %v", err)
@@ -82,5 +86,38 @@ func TestRemove(t *testing.T) {
 		{Name: "s3", User: "u3", Host: "h3"}}
 	if got := testConf.Servers; !reflect.DeepEqual(got, want) {
 		t.Fatalf("got: %v, want %v", got, want)
+	}
+}
+
+func TestUpdate(t *testing.T) {
+	t.Parallel()
+	// test set up and tearDown
+	testFile, testConf, err := setUp()
+	defer tearDown(testFile)
+	if err != nil {
+		t.Errorf("error setting up test scenario: %v", err)
+	}
+	// populate test data
+	testConf.Servers = []config.Server{
+		{Name: "s1", User: "u1", Host: "h1"},
+		{Name: "s2", User: "u2", Host: "h2"},
+		{Name: "s3", User: "u3", Host: "h3"},
+		{Name: "s4", User: "u4", Host: "h4"}}
+	pm := &promptMock{
+		questionTracker:    0,
+		qa:                 questionAnswer{1: "s2B", 2: "u2B", 3: "h2B"},
+		simpleSelectAnswer: 1}
+	// execute tested function
+	err = testConf.Update(pm)
+	if err != nil {
+		t.Errorf("TestUpdate - error executing testConf.Update: %v", err)
+	}
+	want := []config.Server{
+		{Name: "s1", User: "u1", Host: "h1"},
+		{Name: "s2B", User: "u2B", Host: "h2B"},
+		{Name: "s3", User: "u3", Host: "h3"},
+		{Name: "s4", User: "u4", Host: "h4"}}
+	if got := testConf.Servers; !reflect.DeepEqual(got, want) {
+		t.Fatalf("got %v, want %v", got, want)
 	}
 }

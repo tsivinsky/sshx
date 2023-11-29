@@ -2,9 +2,10 @@ package main
 
 import (
 	"flag"
-	"log"
+	"fmt"
+	"os"
 
-	"github.com/tsivinsky/sshx/command"
+	ghPrompter "github.com/cli/go-gh/v2/pkg/prompter"
 	"github.com/tsivinsky/sshx/config"
 )
 
@@ -13,42 +14,39 @@ var (
 )
 
 func main() {
+	// parses cli flags
 	flag.Parse()
 
-	var err error
-
-	conf, err := config.Load()
+	// creates pointer config.Config using the constructure and overriding defaults with CLI values
+	conf, err := config.NewConfig()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintln(os.Stderr, err)
+	}
+	//
+	prompter := ghPrompter.New(os.Stdin, os.Stdout, os.Stderr)
+	// loads configuration
+	err = conf.Load()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
 	}
 
 	switch flag.Arg(0) {
 	case "add":
-		err = command.Add(conf)
-		break
-
+		err = conf.Add(prompter)
 	case "connect":
-		err = command.Connect(conf, *serverName)
-		break
-
+		err = conf.Connect(prompter, *serverName)
 	case "list", "ls":
-		err = command.List(conf)
-		break
-
+		err = conf.List(os.Stdout)
 	case "remove", "rm":
-		err = command.Remove(conf)
-		break
-
+		err = conf.Remove(prompter)
 	case "update":
-		err = command.Update(conf)
-		break
-
+		err = conf.Update(prompter)
 	default:
-		err = command.Connect(conf, *serverName)
-		break
+		err = conf.Connect(prompter, *serverName)
 	}
 
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintln(os.Stderr, err)
 	}
+
 }

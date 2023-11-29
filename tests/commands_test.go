@@ -59,3 +59,7 @@ func TestAdd(t *testing.T) {
 	}
 
 }
+
+func TestRemove(t *testing.T) {
+
+}

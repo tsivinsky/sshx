@@ -13,8 +13,18 @@ var (
 	serverName = flag.String("name", "", "server name")
 )
 
+var usage = `Usage: sshx <command>
+
+Commands:
+ - add
+ - list, ls
+ - rm
+ - update`
+
 func main() {
-	// parses cli flags
+	flag.Usage = func() {
+		fmt.Println(usage)
+	}
 	flag.Parse()
 
 	// creates pointer config.Config using the constructure and overriding defaults with CLI values
